@@ -1,0 +1,17 @@
+body {
+    background: #eee;
+}
+
+article img {
+    width: 25%;
+}
+
+@media (max-width: 767.98px) {
+    article img {
+        width: 100%;
+    }
+}
+
+a:hover {
+    text-decoration: none;
+}

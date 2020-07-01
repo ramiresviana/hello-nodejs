@@ -19,4 +19,18 @@ function loadPage(pageName) {
     return pageData;
 }
 
-module.exports = { loadView, loadPage };
+function getAssets() {
+    const assetsPath = path.join(__dirname, 'assets');
+    const assetsFiles = fs.readdirSync(assetsPath);
+
+    return assetsFiles;
+}
+
+function loadAsset(assetFilename) {
+    const assetPath = path.join(__dirname, 'assets', assetFilename);
+    const assetData = fs.readFileSync(assetPath);
+
+    return assetData;
+}
+
+module.exports = { loadView, loadPage, getAssets, loadAsset };
