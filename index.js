@@ -1,6 +1,7 @@
 const http = require('http');
 const path = require('path');
-const { loadPage, getAssets, loadAsset } = require('./utils');
+const { getAssets, loadAsset } = require('./utils');
+const routes = require('./routes');
 
 const server = http.createServer();
 const assets = getAssets();
@@ -17,8 +18,18 @@ server.on('request', (request, response) => {
         return response.end();
     }
 
-    console.log('request', url);
-    const pageData = loadPage('listing');
+    let route = '/';
+
+    const routeParts = url.split('/');
+    if (routeParts[1] && routeParts[1] != '') {
+        route = routeParts[1];
+    }
+
+    if (routes[route] == undefined) {
+        return response.end();
+    }
+
+    const pageData = routes[route]();
 
     response.write(pageData);
     response.end();
