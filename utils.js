@@ -9,14 +9,20 @@ function loadView(viewName) {
     return viewData;
 }
 
-function loadPage(pageName) {
+function loadPage(pageName, pageData = {}) {
     const header = loadView('header');
     const content = loadView(pageName);
     const footer = loadView('footer');
 
-    const pageData = header + content + footer;
+    let pageContent = header + content + footer;
 
-    return pageData;
+    for (var key of Object.keys(pageData)) {
+        const data = pageData[key];
+
+        pageContent = pageContent.replace(`[[${key}]]`, data);
+    }
+
+    return pageContent;
 }
 
 function getAssets() {

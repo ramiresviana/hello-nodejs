@@ -1,23 +1,27 @@
 const { loadPage } = require('./utils');
 
 function index() {
-    const pageData = loadPage('listing');
-    return pageData;
+    const pageData = { title: 'Listing' };
+    const pageContent = loadPage('listing', pageData);
+    return pageContent;
 }
 
 function article() {
-    const pageData = loadPage('article');
-    return pageData;
+    const pageData = { title: 'Article' };
+    const pageContent = loadPage('article', pageData);
+    return pageContent;
 }
 
 function login() {
-    const pageData = loadPage('login');
-    return pageData;
+    const pageData = { title: 'Login' };
+    const pageContent = loadPage('login', pageData);
+    return pageContent;
 }
 
 function create() {
-    const pageData = loadPage('new');
-    return pageData;
+    const pageData = { title: 'New' };
+    const pageContent = loadPage('new', pageData);
+    return pageContent;
 }
 
 const routes = {
