@@ -1,26 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 
-function loadView(viewName) {
+function loadView(viewName, viewData = {}) {
     const viewFilename = viewName + '.html';
     const viewPath = path.join(__dirname, 'views', viewFilename);
-    const viewData = fs.readFileSync(viewPath);
+    let viewContent = fs.readFileSync(viewPath, 'utf-8');
 
-    return viewData;
+    viewContent = replaceDataTags(viewContent, viewData);
+
+    return viewContent;
 }
 
 function loadPage(pageName, pageData = {}) {
-    const header = loadView('header');
+    const header = loadView('partials/header');
     const content = loadView(pageName);
-    const footer = loadView('footer');
+    const footer = loadView('partials/footer');
 
     let pageContent = header + content + footer;
-
-    for (var key of Object.keys(pageData)) {
-        const data = pageData[key];
-
-        pageContent = pageContent.replace(`[[${key}]]`, data);
-    }
+    pageContent = replaceDataTags(pageContent, pageData);
 
     return pageContent;
 }
@@ -37,6 +34,18 @@ function loadAsset(assetFilename) {
     const assetData = fs.readFileSync(assetPath);
 
     return assetData;
+}
+
+function replaceDataTags(content, contentData) {
+    let resultContent = content;
+
+    for (var key of Object.keys(contentData)) {
+        const data = contentData[key];
+
+        resultContent = resultContent.replace(`[[${key}]]`, data);
+    }
+
+    return resultContent;
 }
 
 module.exports = { loadView, loadPage, getAssets, loadAsset };
