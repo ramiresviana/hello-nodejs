@@ -29,7 +29,7 @@ server.on('request', (request, response) => {
         return response.end();
     }
 
-    const pageData = routes[route]();
+    const pageData = routes[route](routeParts);
 
     response.write(pageData);
     response.end();
