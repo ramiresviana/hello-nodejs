@@ -48,4 +48,11 @@ function replaceDataTags(content, contentData) {
     return resultContent;
 }
 
-module.exports = { loadView, loadPage, getAssets, loadAsset };
+function getArticles() {
+    const articlesData = fs.readFileSync(path.join(__dirname, 'data', 'articles.json'), 'utf-8');
+    const articles = JSON.parse(articlesData);
+
+    return articles
+}
+
+module.exports = { loadView, loadPage, getAssets, loadAsset, getArticles };
