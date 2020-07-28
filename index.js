@@ -1,5 +1,6 @@
 const http = require('http');
 const path = require('path');
+const formidable = require('formidable');
 const { getAssets, loadAsset } = require('./utils');
 const routes = require('./routes');
 
@@ -27,6 +28,19 @@ server.on('request', (request, response) => {
 
     if (routes[route] == undefined) {
         return response.end();
+    }
+
+    if (method == 'POST') {
+        const form = formidable();
+
+        form.parse(request, (err, fields, files) => {
+            const pageData = routes[route](routeParts, { fields, files });
+
+            response.write(pageData);
+            response.end();
+        });
+
+        return
     }
 
     const pageData = routes[route](routeParts);
