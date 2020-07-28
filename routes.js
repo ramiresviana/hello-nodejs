@@ -39,8 +39,29 @@ function login() {
     return pageContent;
 }
 
-function create() {
-    const pageData = { title: 'New' };
+const imageTypes = ['image/jpeg', 'image/png']
+
+function create(routeParts, form) {
+    const pageData = { title: 'New', result: '' };
+
+    if (form) {
+        const { fields, files } = form;
+        const { title, content } = fields;
+        const { image } = files;
+
+        const validTitle = title && title != '';
+        const validContent = content && content != '';
+        const validImage = image && image.size > 0 && imageTypes.indexOf(image.type) != -1
+
+        const validForm = validTitle && validContent && validImage
+
+        if (validForm) {
+            pageData['result'] = '<div class="alert alert-success">Article created</div>';
+        } else {
+            pageData['result'] = '<div class="alert alert-danger">An error ocurred</div>';
+        }
+    }
+
     const pageContent = loadPage('new', pageData);
     return pageContent;
 }
