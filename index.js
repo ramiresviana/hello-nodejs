@@ -1,5 +1,4 @@
 const http = require('http');
-const path = require('path');
 const formidable = require('formidable');
 const routes = require('./routes');
 
@@ -16,26 +15,25 @@ server.on('request', (request, response) => {
     }
 
     if (routes[route] == undefined) {
+        response.write('not_found');
         return response.end();
     }
 
-    if (method == 'POST') {
-        const form = formidable();
+    const routeFunction = (form = null) => {
+        const pageData = routes[route](routeParts, form);
 
-        form.parse(request, (err, fields, files) => {
-            const pageData = routes[route](routeParts, { fields, files });
+        response.write(pageData);
+        response.end();
+    };
 
-            response.write(pageData);
-            response.end();
-        });
-
-        return
+    if (method != 'POST') {
+        return routeFunction();
     }
 
-    const pageData = routes[route](routeParts);
-
-    response.write(pageData);
-    response.end();
+    const form = formidable();
+    form.parse(request, (err, fields, files) => {
+        routeFunction({ fields, files });
+    });
 });
 
 server.listen(8080);
