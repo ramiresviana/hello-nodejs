@@ -22,17 +22,15 @@ function loadPage(pageName, pageData = {}) {
     return pageContent;
 }
 
-function getAssets() {
-    const assetsPath = path.join(__dirname, 'assets');
-    const assetsFiles = fs.readdirSync(assetsPath);
-
-    return assetsFiles;
-}
-
 function loadAsset(assetFilename) {
     const assetPath = path.join(__dirname, 'assets', assetFilename);
-    const assetData = fs.readFileSync(assetPath);
 
+    const exists = fs.existsSync(assetPath);
+    if (!exists) {
+        return;
+    }
+
+    const assetData = fs.readFileSync(assetPath);
     return assetData;
 }
 
@@ -55,4 +53,16 @@ function getArticles() {
     return articles
 }
 
-module.exports = { loadView, loadPage, getAssets, loadAsset, getArticles };
+function loadImage(imgFilename) {
+    const imgPath = path.join(__dirname, 'data', 'images', imgFilename);
+
+    const exists = fs.existsSync(imgPath);
+    if (!exists) {
+        return null;
+    }
+
+    const imgData = fs.readFileSync(imgPath);
+    return imgData;
+}
+
+module.exports = { loadView, loadPage, loadAsset, getArticles, loadImage };

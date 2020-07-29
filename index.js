@@ -1,23 +1,12 @@
 const http = require('http');
 const path = require('path');
 const formidable = require('formidable');
-const { getAssets, loadAsset } = require('./utils');
 const routes = require('./routes');
 
 const server = http.createServer();
-const assets = getAssets();
 
 server.on('request', (request, response) => {
     const { method, url } = request;
-
-    const filename = path.basename(url);
-
-    if (assets.includes(filename)) {
-        const assetData = loadAsset(filename);
-
-        response.write(assetData);
-        return response.end();
-    }
 
     let route = '/';
 

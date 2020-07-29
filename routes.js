@@ -1,6 +1,7 @@
-const { loadPage, loadView, getArticles } = require('./utils');
+const path = require('path')
+const fs = require('fs')
 
-const articles = getArticles()
+const { loadPage, loadView, loadAsset, getArticles, loadImage } = require('./utils');
 
 function index() {
     let articlesContent = ''
@@ -66,11 +67,43 @@ function create(routeParts, form) {
     return pageContent;
 }
 
+function assets(routeParts) {
+    if (routeParts[2] == undefined) {
+        return 'not_found';
+    }
+
+    const filename = routeParts[2];
+    const assetData = loadAsset(filename);
+
+    if (assetData == undefined) {
+        return 'not_found';
+    }
+
+    return assetData;
+}
+
+function images(routeParts) {
+    if (routeParts[2] == undefined) {
+        return 'not_found';
+    }
+
+    const filename = routeParts[2];
+    const imageData = loadImage(filename);
+
+    if (imageData == undefined) {
+        return 'not_found';
+    }
+
+    return imageData;
+}
+
 const routes = {
     '/' : index,
     'article' : article,
     'login' : login,
-    'new' : create
+    'new' : create,
+    'assets' : assets,
+    'images' : images,
 };
 
 module.exports = routes;
