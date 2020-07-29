@@ -53,6 +53,29 @@ function getArticles() {
     return articles
 }
 
+function addArticle(data) {
+    const articles = getArticles();
+    const id = articles.length;
+
+    const { title, content, image } = data;
+    const article = { image, id, title, content };
+
+    articles.push(article);
+    fs.writeFileSync(path.join(__dirname, 'data', 'articles.json'), JSON.stringify(articles, null, 4));
+
+    return articles;
+}
+
+function addImage(image) {
+    const extension = path.extname(image.name)
+    const filename = new Date().getTime() + extension;
+    const destination = path.join(__dirname, 'data', 'images', filename)
+
+    fs.renameSync(image.path, destination);
+
+    return filename;
+}
+
 function loadImage(imgFilename) {
     const imgPath = path.join(__dirname, 'data', 'images', imgFilename);
 
@@ -65,4 +88,4 @@ function loadImage(imgFilename) {
     return imgData;
 }
 
-module.exports = { loadView, loadPage, loadAsset, getArticles, loadImage };
+module.exports = { loadView, loadPage, loadAsset, getArticles, addArticle, addImage, loadImage };

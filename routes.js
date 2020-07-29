@@ -1,7 +1,9 @@
 const path = require('path')
 const fs = require('fs')
 
-const { loadPage, loadView, loadAsset, getArticles, loadImage } = require('./utils');
+const { loadPage, loadView, loadAsset, getArticles, addArticle, addImage, loadImage } = require('./utils');
+
+let articles = getArticles()
 
 function index() {
     let articlesContent = ''
@@ -57,6 +59,11 @@ function create(routeParts, form) {
         const validForm = validTitle && validContent && validImage
 
         if (validForm) {
+            const imageName = addImage(image);
+
+            const article = { title, content, image: imageName }
+            articles = addArticle(article);
+
             pageData['result'] = '<div class="alert alert-success">Article created</div>';
         } else {
             pageData['result'] = '<div class="alert alert-danger">An error ocurred</div>';
