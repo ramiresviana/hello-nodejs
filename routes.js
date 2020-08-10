@@ -8,8 +8,8 @@ let articles = getArticles()
 function index() {
     let articlesContent = ''
 
-    articles.forEach((element) => {
-        articlesContent += loadView('partials/article', element);
+    Object.keys(articles).forEach((key) => {
+        articlesContent += loadView('partials/article', articles[key]);
     })
 
     const pageData = { title: 'Listing', listing: articlesContent };

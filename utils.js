@@ -55,12 +55,12 @@ function getArticles() {
 
 function addArticle(data) {
     const articles = getArticles();
-    const id = articles.length;
+    const id = Object.keys(articles).length + 1;
 
     const { title, content, image } = data;
-    const article = { image, id, title, content };
+    const article = { id, image, title, content };
 
-    articles.push(article);
+    articles[id] = article;
     fs.writeFileSync(path.join(__dirname, 'data', 'articles.json'), JSON.stringify(articles, null, 4));
 
     return articles;
@@ -89,7 +89,7 @@ function removeArticle(id) {
         return;
     }
 
-    articles.splice(id, 1);
+    delete articles[id];
     fs.writeFileSync(path.join(__dirname, 'data', 'articles.json'), JSON.stringify(articles, null, 4));
 
     return articles;
@@ -106,7 +106,11 @@ function addImage(image) {
 }
 
 function removeImage(filename) {
-    fs.unlinkSync(path.join(__dirname, 'data', 'images', filename));
+    try {
+        fs.unlinkSync(path.join(__dirname, 'data', 'images', filename));
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 function loadImage(imgFilename) {
