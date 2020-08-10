@@ -82,6 +82,19 @@ function updateArticle(id, data) {
     return articles;
 }
 
+function removeArticle(id) {
+    const articles = getArticles();
+
+    if (articles[id] == undefined) {
+        return;
+    }
+
+    articles.splice(id, 1);
+    fs.writeFileSync(path.join(__dirname, 'data', 'articles.json'), JSON.stringify(articles, null, 4));
+
+    return articles;
+}
+
 function addImage(image) {
     const extension = path.extname(image.name)
     const filename = new Date().getTime() + extension;
@@ -108,4 +121,4 @@ function loadImage(imgFilename) {
     return imgData;
 }
 
-module.exports = { loadView, loadPage, loadAsset, getArticles, addArticle, updateArticle, addImage, removeImage, loadImage };
+module.exports = { loadView, loadPage, loadAsset, getArticles, addArticle, updateArticle, removeArticle, addImage, removeImage, loadImage };

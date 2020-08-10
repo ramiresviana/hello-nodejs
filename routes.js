@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const { loadPage, loadView, loadAsset, getArticles, addArticle, updateArticle, addImage, removeImage, loadImage } = require('./utils');
+const { loadPage, loadView, loadAsset, getArticles, addArticle, updateArticle, removeArticle, addImage, removeImage, loadImage } = require('./utils');
 
 let articles = getArticles()
 
@@ -125,6 +125,31 @@ function update(routeParts, form) {
     return pageContent;
 }
 
+function destroy(routeParts, form) {
+    if (routeParts[2] == undefined) {
+        return 'not_found';
+    }
+
+    let id = routeParts[2];
+
+    if (articles[id] == undefined) {
+        return 'not_found';
+    }
+
+    const article = articles[id];
+
+    const pageData = { title: 'Remove', result: '' };
+
+    if (form) {
+        removeImage(article.image);
+        articles = removeArticle(id);
+        pageData['result'] = '<div class="alert alert-success">Article removed</div>';
+    }
+
+    const pageContent = loadPage('remove', pageData);
+    return pageContent;
+}
+
 function assets(routeParts) {
     if (routeParts[2] == undefined) {
         return 'not_found';
@@ -161,6 +186,7 @@ const routes = {
     'login' : login,
     'new' : create,
     'edit' : update,
+    'remove' : destroy,
     'assets' : assets,
     'images' : images,
 };
