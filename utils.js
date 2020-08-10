@@ -40,7 +40,7 @@ function replaceDataTags(content, contentData) {
     for (var key of Object.keys(contentData)) {
         const data = contentData[key];
 
-        resultContent = resultContent.replace(`[[${key}]]`, data);
+        resultContent = resultContent.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), data);
     }
 
     return resultContent;
