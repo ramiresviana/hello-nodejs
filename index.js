@@ -7,6 +7,8 @@ const server = http.createServer();
 server.on('request', (request, response) => {
     const { method, url } = request;
 
+    console.log(new Date(), request.connection.remoteAddress, method, url);
+
     let route = '/';
 
     const routeParts = url.split('/');
@@ -37,3 +39,5 @@ server.on('request', (request, response) => {
 });
 
 server.listen(8080);
+
+console.log('Server is running');
