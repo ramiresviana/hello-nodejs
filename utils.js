@@ -66,6 +66,22 @@ function addArticle(data) {
     return articles;
 }
 
+function updateArticle(id, data) {
+    const articles = getArticles();
+
+    if (articles[id] == undefined) {
+        return;
+    }
+
+    const { title, content, image } = data;
+    const newArticle = { id: parseInt(id), image, title, content };
+
+    articles[id] = newArticle;
+    fs.writeFileSync(path.join(__dirname, 'data', 'articles.json'), JSON.stringify(articles, null, 4));
+
+    return articles;
+}
+
 function addImage(image) {
     const extension = path.extname(image.name)
     const filename = new Date().getTime() + extension;
@@ -74,6 +90,10 @@ function addImage(image) {
     fs.renameSync(image.path, destination);
 
     return filename;
+}
+
+function removeImage(filename) {
+    fs.unlinkSync(path.join(__dirname, 'data', 'images', filename));
 }
 
 function loadImage(imgFilename) {
@@ -88,4 +108,4 @@ function loadImage(imgFilename) {
     return imgData;
 }
 
-module.exports = { loadView, loadPage, loadAsset, getArticles, addArticle, addImage, loadImage };
+module.exports = { loadView, loadPage, loadAsset, getArticles, addArticle, updateArticle, addImage, removeImage, loadImage };

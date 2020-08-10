@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const { loadPage, loadView, loadAsset, getArticles, addArticle, addImage, loadImage } = require('./utils');
+const { loadPage, loadView, loadAsset, getArticles, addArticle, updateArticle, addImage, removeImage, loadImage } = require('./utils');
 
 let articles = getArticles()
 
@@ -31,7 +31,7 @@ function article(routeParts) {
 
     let { image, title, content } = articles[id];
 
-    const pageData = { title: 'Article', articleImage: image, articleTitle: title, articleContent: content };
+    const pageData = { title: 'Article', articleId: id, articleImage: image, articleTitle: title, articleContent: content };
     const pageContent = loadPage('article', pageData);
     return pageContent;
 }
@@ -74,6 +74,57 @@ function create(routeParts, form) {
     return pageContent;
 }
 
+function update(routeParts, form) {
+    if (routeParts[2] == undefined) {
+        return 'not_found';
+    }
+
+    let id = routeParts[2];
+
+    if (articles[id] == undefined) {
+        return 'not_found';
+    }
+
+    const article = articles[id];
+
+    const pageData = { title: 'Article', result: '', articleImage: article.image, articleTitle: article.title, articleContent: article.content };
+
+    if (form) {
+        const { fields, files } = form;
+        const { title, content } = fields;
+        const { image } = files;
+
+        const validTitle = title && title != '';
+        const validContent = content && content != '';
+        const validImage = image && image.size > 0 && imageTypes.indexOf(image.type) != -1
+
+        const validForm = validTitle && validContent
+
+        if (validForm) {
+            const newData = { title, content, image: article.image }
+
+            if (validImage) {
+                removeImage(article.image);
+                const imageName = addImage(image);
+
+                newData.image = imageName;
+            }
+
+            articles = updateArticle(id, newData);
+
+            pageData['articleImage'] = newData.image;
+            pageData['articleTitle'] = newData.title;
+            pageData['articleContent'] = newData.content;
+            pageData['result'] = '<div class="alert alert-success">Article updated</div>';
+        } else {
+            pageData['result'] = '<div class="alert alert-danger">An error ocurred</div>';
+        }
+    }
+
+    const pageContent = loadPage('edit', pageData);
+    return pageContent;
+}
+
 function assets(routeParts) {
     if (routeParts[2] == undefined) {
         return 'not_found';
@@ -109,6 +160,7 @@ const routes = {
     'article' : article,
     'login' : login,
     'new' : create,
+    'edit' : update,
     'assets' : assets,
     'images' : images,
 };
