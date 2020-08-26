@@ -1,3 +1,4 @@
+const cookie = require('cookie')
 const fs = require('fs');
 const path = require('path');
 
@@ -125,4 +126,26 @@ function loadImage(imgFilename) {
     return imgData;
 }
 
-module.exports = { loadView, loadPage, loadAsset, getArticles, addArticle, updateArticle, removeArticle, addImage, removeImage, loadImage };
+const credentials = { user: 'admin', pass: 'admin' };
+
+function authenticate(user, pass) {
+    const validUser = user == credentials.user;
+    const validPass = pass == credentials.pass;
+    const valid = validUser && validPass;
+
+    return valid;
+}
+
+function isLogged(request) {
+    if (!request || !request.headers || !request.headers.cookie) {
+        return false;
+    }
+
+    const data = cookie.parse(request.headers.cookie).auth;
+    const auth = Buffer.from(data, 'base64').toString('ascii');
+    const parts = auth.split(':');
+
+    return authenticate(parts[0], parts[1]);
+}
+
+module.exports = { loadView, loadPage, loadAsset, getArticles, addArticle, updateArticle, removeArticle, addImage, removeImage, loadImage, authenticate, isLogged };

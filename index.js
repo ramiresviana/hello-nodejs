@@ -22,7 +22,7 @@ server.on('request', (request, response) => {
     }
 
     const routeFunction = (form = null) => {
-        const pageData = routes[route](routeParts, form);
+        const pageData = routes[route](routeParts, form, request, response);
 
         response.write(pageData);
         response.end();

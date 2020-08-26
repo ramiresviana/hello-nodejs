@@ -1,7 +1,8 @@
+const cookie = require('cookie')
 const path = require('path')
 const fs = require('fs')
 
-const { loadPage, loadView, loadAsset, getArticles, addArticle, updateArticle, removeArticle, addImage, removeImage, loadImage } = require('./utils');
+const { loadPage, loadView, loadAsset, getArticles, addArticle, updateArticle, removeArticle, addImage, removeImage, loadImage, authenticate, isLogged } = require('./utils');
 
 let articles = getArticles()
 const listingLimit = 5;
@@ -94,15 +95,59 @@ function article(routeParts) {
     return pageContent;
 }
 
-function login() {
-    const pageData = { title: 'Login' };
+function login(routeParts, form, request, response) {
+    if (isLogged(request)) {
+        return 'is_logged';
+    }
+
+    const pageData = { title: 'Login', result: '' };
+
+    if (form) {
+        const { user, pass } = form.fields;
+
+        const validUser = user && user != '';
+        const validPass = pass && pass != '';
+        const validForm = validUser && validPass && authenticate(user, pass)
+
+        if (validForm) {
+            const auth = `${user}:${pass}`;
+            const data = Buffer.from(auth).toString('base64');
+
+            response.setHeader('Set-Cookie', cookie.serialize('auth', data));
+
+            pageData['result'] = '<div class="alert alert-success">Authenticated</div>';
+        } else {
+            pageData['result'] = '<div class="alert alert-danger">Invalid credentials</div>';
+        }
+    }
+
     const pageContent = loadPage('login', pageData);
+    return pageContent;
+}
+
+function logout(routeParts, form, request, response) {
+    if (!isLogged(request)) {
+        return 'not_logged';
+    }
+
+    const pageData = { title: 'Logout', result: '' };
+
+    if (form) {
+        response.setHeader('Set-Cookie', cookie.serialize('auth', ''));
+        pageData['result'] = '<div class="alert alert-success">Logged out</div>';
+    }
+
+    const pageContent = loadPage('logout', pageData);
     return pageContent;
 }
 
 const imageTypes = ['image/jpeg', 'image/png']
 
-function create(routeParts, form) {
+function create(routeParts, form, request) {
+    if (!isLogged(request)) {
+        return 'not_logged';
+    }
+
     const pageData = { title: 'New', result: '' };
 
     if (form) {
@@ -132,7 +177,11 @@ function create(routeParts, form) {
     return pageContent;
 }
 
-function update(routeParts, form) {
+function update(routeParts, form, request) {
+    if (!isLogged(request)) {
+        return 'not_logged';
+    }
+
     if (routeParts[2] == undefined) {
         return 'not_found';
     }
@@ -183,7 +232,11 @@ function update(routeParts, form) {
     return pageContent;
 }
 
-function destroy(routeParts, form) {
+function destroy(routeParts, form, request) {
+    if (!isLogged(request)) {
+        return 'not_logged';
+    }
+
     if (routeParts[2] == undefined) {
         return 'not_found';
     }
@@ -243,6 +296,7 @@ const routes = {
     'page' : page,
     'article' : article,
     'login' : login,
+    'logout': logout,
     'new' : create,
     'edit' : update,
     'remove' : destroy,
