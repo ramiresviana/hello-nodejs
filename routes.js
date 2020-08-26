@@ -7,13 +7,14 @@ const { loadPage, loadView, loadAsset, getArticles, addArticle, updateArticle, r
 let articles = getArticles()
 const listingLimit = 5;
 
-function index() {
+function index(routeParts, form, request) {
     let articlesContent = ''
 
+    const articlesList = Object.keys(articles);
     let showPagination = false;
 
     let counter = 0;
-    Object.keys(articles).forEach((key) => {
+    articlesList.forEach((key) => {
         if (counter >= listingLimit) {
             showPagination = true;
             return;
@@ -29,7 +30,13 @@ function index() {
         pagination += `<a href="/page/2" class="btn btn-primary mt-3">Next page</a>`;
     }
 
-    const pageData = { title: 'Listing', listing: articlesContent, pagination };
+    let dropdown = '';
+
+    if (isLogged(request)) {
+        dropdown = loadView('partials/dropdown', { counter: articlesList.length });
+    }
+
+    const pageData = { title: 'Listing', listing: articlesContent, pagination, dropdown };
     const pageContent = loadPage('listing', pageData);
 
     return pageContent;
@@ -77,7 +84,7 @@ function page(routeParts) {
     return pageContent;
 }
 
-function article(routeParts) {
+function article(routeParts, form, request) {
     if (routeParts[2] == undefined) {
         return 'not_found';
     }
@@ -90,7 +97,14 @@ function article(routeParts) {
 
     let { image, title, content } = articles[id];
 
-    const pageData = { title: 'Article', articleId: id, articleImage: image, articleTitle: title, articleContent: content };
+
+    let actions = '';
+
+    if (isLogged(request)) {
+        actions = loadView('partials/actions', { articleId: id });
+    }
+
+    const pageData = { title: 'Article', articleId: id, articleImage: image, articleTitle: title, articleContent: content, actions };
     const pageContent = loadPage('article', pageData);
     return pageContent;
 }
