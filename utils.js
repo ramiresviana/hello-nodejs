@@ -2,6 +2,7 @@ const cookie = require('cookie')
 const fs = require('fs');
 const path = require('path');
 
+// get contents of views folder and replace data tags
 function loadView(viewName, viewData = {}) {
     const viewFilename = viewName + '.html';
     const viewPath = path.join(__dirname, 'views', viewFilename);
@@ -12,6 +13,7 @@ function loadView(viewName, viewData = {}) {
     return viewContent;
 }
 
+// create page structure with head, content and footer replacing data tags
 function loadPage(pageName, pageData = {}) {
     const header = loadView('partials/header');
     const content = loadView(pageName);
@@ -23,6 +25,7 @@ function loadPage(pageName, pageData = {}) {
     return pageContent;
 }
 
+// get content of assets folder
 function loadAsset(assetFilename) {
     const assetPath = path.join(__dirname, 'assets', assetFilename);
 
@@ -35,6 +38,7 @@ function loadAsset(assetFilename) {
     return assetData;
 }
 
+// replace tags from a string
 function replaceDataTags(content, contentData) {
     let resultContent = content;
 
@@ -47,6 +51,7 @@ function replaceDataTags(content, contentData) {
     return resultContent;
 }
 
+// get articles from data file contents
 function getArticles() {
     const articlesData = fs.readFileSync(path.join(__dirname, 'data', 'articles.json'), 'utf-8');
     const articles = JSON.parse(articlesData);
@@ -54,6 +59,7 @@ function getArticles() {
     return articles
 }
 
+// inserts article into data file
 function addArticle(data) {
     const articles = getArticles();
     const id = Object.keys(articles).length + 1;
@@ -67,6 +73,7 @@ function addArticle(data) {
     return articles;
 }
 
+// overrides an article on data file
 function updateArticle(id, data) {
     const articles = getArticles();
 
@@ -83,6 +90,7 @@ function updateArticle(id, data) {
     return articles;
 }
 
+// remove article from data file
 function removeArticle(id) {
     const articles = getArticles();
 
@@ -96,6 +104,7 @@ function removeArticle(id) {
     return articles;
 }
 
+// adds image to data folder
 function addImage(image) {
     const extension = path.extname(image.name)
     const filename = new Date().getTime() + extension;
@@ -106,6 +115,7 @@ function addImage(image) {
     return filename;
 }
 
+// removes image from data folder
 function removeImage(filename) {
     try {
         fs.unlinkSync(path.join(__dirname, 'data', 'images', filename));
@@ -114,6 +124,7 @@ function removeImage(filename) {
     }
 }
 
+// get contents of data images folder
 function loadImage(imgFilename) {
     const imgPath = path.join(__dirname, 'data', 'images', imgFilename);
 
@@ -126,8 +137,10 @@ function loadImage(imgFilename) {
     return imgData;
 }
 
+// static credentials for authentication
 const credentials = { user: 'admin', pass: 'admin' };
 
+// checks for valid credentials
 function authenticate(user, pass) {
     const validUser = user == credentials.user;
     const validPass = pass == credentials.pass;
@@ -136,6 +149,7 @@ function authenticate(user, pass) {
     return valid;
 }
 
+// checks for valid cookie credentials
 function isLogged(request) {
     if (!request || !request.headers || !request.headers.cookie) {
         return false;

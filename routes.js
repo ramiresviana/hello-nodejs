@@ -14,7 +14,9 @@ function index(routeParts, form, request) {
     let showPagination = false;
 
     let counter = 0;
+    // iterate on all articles
     articlesList.forEach((key) => {
+        // stop add articles when arriving the limit
         if (counter >= listingLimit) {
             showPagination = true;
             return;
@@ -26,12 +28,14 @@ function index(routeParts, form, request) {
 
     let pagination = '';
 
+    // shows pagination when number of articles is more than the limit
     if (showPagination) {
         pagination += `<a href="/page/2" class="btn btn-primary mt-3">Next page</a>`;
     }
 
     let dropdown = '';
 
+    // shows admin actions when logged
     if (isLogged(request)) {
         dropdown = loadView('partials/dropdown', { counter: articlesList.length });
     }
@@ -47,7 +51,9 @@ function page(routeParts) {
         return 'not_found';
     }
 
+    // the 3º route part is the page number
     const current = parseInt(routeParts[2]);
+    // converts object into array of articles
     const articleList = Object.keys(articles);
     const pages = Math.ceil(articleList.length / listingLimit);
 
@@ -55,13 +61,16 @@ function page(routeParts) {
         return 'not_found';
     }
 
+    // index of starting articles to show
     const start = listingLimit * (current - 1);
+    // index of ending articles to show
     const end = start + listingLimit;
 
     let articlesContent = '';
     let counter = 0;
 
     articleList.forEach((key) => {
+        // shows only articles in the range
         if (counter >= start && counter < end) {
             articlesContent += loadView('partials/article', articles[key]);
         }
@@ -70,10 +79,12 @@ function page(routeParts) {
 
     let pagination = '';
 
+    // shows pagination before button
     if (current > 1) {
         pagination += `<a href="/page/${current-1}" class="btn btn-primary mt-3 mr-3">Previous page</a>`;
     }
 
+    // shows pagination next button
     if (current < pages) {
         pagination += `<a href="/page/${current+1}" class="btn btn-primary mt-3">Next page</a>`;
     }
@@ -89,6 +100,7 @@ function article(routeParts, form, request) {
         return 'not_found';
     }
 
+    // the 3º route part is id of the article
     let id = routeParts[2];
 
     if (articles[id] == undefined) {
@@ -98,6 +110,7 @@ function article(routeParts, form, request) {
     let { image, title, content } = articles[id];
 
 
+    // shows article actions when logged
     let actions = '';
 
     if (isLogged(request)) {
@@ -116,6 +129,7 @@ function login(routeParts, form, request, response) {
 
     const pageData = { title: 'Login', result: '' };
 
+    // form is submitted
     if (form) {
         const { user, pass } = form.fields;
 
@@ -123,10 +137,14 @@ function login(routeParts, form, request, response) {
         const validPass = pass && pass != '';
         const validForm = validUser && validPass && authenticate(user, pass)
 
+        // valid fields and crendetials
         if (validForm) {
+            // string format user:pass
             const auth = `${user}:${pass}`;
+            // transform string into base64
             const data = Buffer.from(auth).toString('base64');
 
+            // set cookie on the browser
             response.setHeader('Set-Cookie', cookie.serialize('auth', data));
 
             pageData['result'] = '<div class="alert alert-success">Authenticated</div>';
@@ -140,13 +158,16 @@ function login(routeParts, form, request, response) {
 }
 
 function logout(routeParts, form, request, response) {
+    // requires login
     if (!isLogged(request)) {
         return 'not_logged';
     }
 
     const pageData = { title: 'Logout', result: '' };
 
+    // form is submitted
     if (form) {
+        // set empty cookie on the browser
         response.setHeader('Set-Cookie', cookie.serialize('auth', ''));
         pageData['result'] = '<div class="alert alert-success">Logged out</div>';
     }
@@ -155,15 +176,18 @@ function logout(routeParts, form, request, response) {
     return pageContent;
 }
 
+// allowed image types for article form
 const imageTypes = ['image/jpeg', 'image/png']
 
 function create(routeParts, form, request) {
+    // requires login
     if (!isLogged(request)) {
         return 'not_logged';
     }
 
     const pageData = { title: 'New', result: '' };
 
+    // form is submitted
     if (form) {
         const { fields, files } = form;
         const { title, content } = fields;
@@ -171,10 +195,12 @@ function create(routeParts, form, request) {
 
         const validTitle = title && title != '';
         const validContent = content && content != '';
+        // check file type
         const validImage = image && image.size > 0 && imageTypes.indexOf(image.type) != -1
 
         const validForm = validTitle && validContent && validImage
 
+        // valid fields and files
         if (validForm) {
             const imageName = addImage(image);
 
@@ -192,16 +218,20 @@ function create(routeParts, form, request) {
 }
 
 function update(routeParts, form, request) {
+    // requires login
     if (!isLogged(request)) {
         return 'not_logged';
     }
 
+    // requires 3º route part
     if (routeParts[2] == undefined) {
         return 'not_found';
     }
 
+    // the 3º route part is id of the article
     let id = routeParts[2];
 
+    // requires existing article id
     if (articles[id] == undefined) {
         return 'not_found';
     }
@@ -210,6 +240,7 @@ function update(routeParts, form, request) {
 
     const pageData = { title: 'Article', result: '', articleImage: article.image, articleTitle: article.title, articleContent: article.content };
 
+    // form is submitted
     if (form) {
         const { fields, files } = form;
         const { title, content } = fields;
@@ -217,10 +248,12 @@ function update(routeParts, form, request) {
 
         const validTitle = title && title != '';
         const validContent = content && content != '';
+        // check file type
         const validImage = image && image.size > 0 && imageTypes.indexOf(image.type) != -1
 
         const validForm = validTitle && validContent
 
+        // valid fields and files
         if (validForm) {
             const newData = { title, content, image: article.image }
 
@@ -247,16 +280,20 @@ function update(routeParts, form, request) {
 }
 
 function destroy(routeParts, form, request) {
+    // requires login
     if (!isLogged(request)) {
         return 'not_logged';
     }
 
+    // requires 3º route part
     if (routeParts[2] == undefined) {
         return 'not_found';
     }
 
+    // the 3º route part is id of the article
     let id = routeParts[2];
 
+    // requires existing article id
     if (articles[id] == undefined) {
         return 'not_found';
     }
@@ -265,6 +302,7 @@ function destroy(routeParts, form, request) {
 
     const pageData = { title: 'Remove', result: '' };
 
+    // form is submitted
     if (form) {
         removeImage(article.image);
         articles = removeArticle(id);
@@ -276,10 +314,12 @@ function destroy(routeParts, form, request) {
 }
 
 function assets(routeParts) {
+    // requires 3º route part
     if (routeParts[2] == undefined) {
         return 'not_found';
     }
 
+    // the 3º route part is the asset filename
     const filename = routeParts[2];
     const assetData = loadAsset(filename);
 
@@ -291,10 +331,12 @@ function assets(routeParts) {
 }
 
 function images(routeParts) {
+    // requires 3º route part
     if (routeParts[2] == undefined) {
         return 'not_found';
     }
 
+    // the 3º route part is the image filename
     const filename = routeParts[2];
     const imageData = loadImage(filename);
 
