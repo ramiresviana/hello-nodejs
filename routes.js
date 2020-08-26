@@ -4,15 +4,73 @@ const fs = require('fs')
 const { loadPage, loadView, loadAsset, getArticles, addArticle, updateArticle, removeArticle, addImage, removeImage, loadImage } = require('./utils');
 
 let articles = getArticles()
+const listingLimit = 5;
 
 function index() {
     let articlesContent = ''
 
+    let showPagination = false;
+
+    let counter = 0;
     Object.keys(articles).forEach((key) => {
+        if (counter >= listingLimit) {
+            showPagination = true;
+            return;
+        }
+        counter++;
+
         articlesContent += loadView('partials/article', articles[key]);
     })
 
-    const pageData = { title: 'Listing', listing: articlesContent };
+    let pagination = '';
+
+    if (showPagination) {
+        pagination += `<a href="/page/2" class="btn btn-primary mt-3">Next page</a>`;
+    }
+
+    const pageData = { title: 'Listing', listing: articlesContent, pagination };
+    const pageContent = loadPage('listing', pageData);
+
+    return pageContent;
+}
+
+function page(routeParts) {
+    if (routeParts[2] == undefined) {
+        return 'not_found';
+    }
+
+    const current = parseInt(routeParts[2]);
+    const articleList = Object.keys(articles);
+    const pages = Math.ceil(articleList.length / listingLimit);
+
+    if (!current || current < 1 || current > pages) {
+        return 'not_found';
+    }
+
+    const start = listingLimit * (current - 1);
+    const end = start + listingLimit;
+
+    let articlesContent = '';
+    let counter = 0;
+
+    articleList.forEach((key) => {
+        if (counter >= start && counter < end) {
+            articlesContent += loadView('partials/article', articles[key]);
+        }
+        counter++;
+    })
+
+    let pagination = '';
+
+    if (current > 1) {
+        pagination += `<a href="/page/${current-1}" class="btn btn-primary mt-3 mr-3">Previous page</a>`;
+    }
+
+    if (current < pages) {
+        pagination += `<a href="/page/${current+1}" class="btn btn-primary mt-3">Next page</a>`;
+    }
+
+    const pageData = { title: 'Listing', listing: articlesContent, pagination };
     const pageContent = loadPage('listing', pageData);
 
     return pageContent;
@@ -182,6 +240,7 @@ function images(routeParts) {
 
 const routes = {
     '/' : index,
+    'page' : page,
     'article' : article,
     'login' : login,
     'new' : create,
