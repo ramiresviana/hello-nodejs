@@ -347,6 +347,180 @@ function images(routeParts) {
     return imageData;
 }
 
+function api(routeParts, form, request, response) {
+    const checkAuth = () => {
+        // checks for basic authorization header
+        if (!request.headers.authorization) {
+            return false;
+        }
+
+        const data = request.headers.authorization.split(' ')[1];
+        const auth = Buffer.from(data, 'base64').toString('ascii');
+        const parts = auth.split(':');
+
+        return authenticate(parts[0], parts[1]);
+    }
+
+    const actions = {
+        index () {
+            return JSON.stringify(articles);
+        },
+        show () {
+            // requires 4º route part
+            if (routeParts[3] == undefined) {
+                return 'not_found';
+            }
+
+            // the 4º route part is id of the article
+            const id = routeParts[3];
+
+            // requires existing article id
+            if (articles[id] == undefined) {
+                return 'not_found';
+            }
+
+            return JSON.stringify(articles[id]);
+        },
+        new () {
+            // requires login
+            if (!checkAuth()) {
+                return 'not_logged';
+            }
+
+            // requires form
+            if (!form) {
+                return 'api_error';
+            }
+
+            const { fields, files } = form;
+            const { title, content } = fields;
+            const { image } = files;
+
+            const validTitle = title && title != '';
+            const validContent = content && content != '';
+            // check file type
+            const validImage = image && image.size > 0 && imageTypes.indexOf(image.type) != -1
+
+            const validForm = validTitle && validContent && validImage
+
+            // valid fields and files
+            if (validForm) {
+                const imageName = addImage(image);
+
+                const article = { title, content, image: imageName }
+                articles = addArticle(article);
+
+                return 'article_created';
+            } else {
+                return 'api_error';
+            }
+        },
+        update () {
+            // requires login
+            if (!checkAuth()) {
+                return 'not_logged';
+            }
+
+            // requires form
+            if (!form) {
+                return 'api_error';
+            }
+
+            // requires 4º route part
+            if (routeParts[3] == undefined) {
+                return 'not_found';
+            }
+
+            // the 4º route part is id of the article
+            let id = routeParts[3];
+
+            // requires existing article id
+            if (articles[id] == undefined) {
+                return 'not_found';
+            }
+
+            const article = articles[id];
+
+            const { fields, files } = form;
+            const { title, content } = fields;
+            const { image } = files;
+
+            const validTitle = title && title != '';
+            const validContent = content && content != '';
+            // check file type
+            const validImage = image && image.size > 0 && imageTypes.indexOf(image.type) != -1
+
+            const validForm = validTitle && validContent
+
+            // valid fields and files
+            if (validForm) {
+                const newData = { title, content, image: article.image }
+
+                if (validImage) {
+                    removeImage(article.image);
+                    const imageName = addImage(image);
+
+                    newData.image = imageName;
+                }
+
+                articles = updateArticle(id, newData);
+
+                return 'article_updated';
+            } else {
+                return 'api_error';
+            }
+        },
+        delete () {
+            // requires login
+            if (!checkAuth()) {
+                return 'not_logged';
+            }
+
+            // requires form
+            if (!form) {
+                return 'api_error';
+            }
+
+            // requires 4º route part
+            if (routeParts[3] == undefined) {
+                return 'not_found';
+            }
+
+            // the 4º route part is id of the article
+            let id = routeParts[3];
+
+            // requires existing article id
+            if (articles[id] == undefined) {
+                return 'not_found';
+            }
+
+            const article = articles[id];
+
+            removeImage(article.image);
+            articles = removeArticle(id);
+
+            return 'article_removed';
+        }
+    }
+
+    // requires 3º route part
+    if (routeParts[3] == undefined) {
+        return 'invalid_request';
+    }
+
+    // the 3º route part is the action
+    const action = routeParts[2];
+
+    if (!actions[action]) {
+        return 'invalid_request';
+    }
+
+    // set json content type header
+    response.setHeader('Content-Type', 'application/json');
+
+    return actions[action](routeParts);
+}
+
 const routes = {
     '/' : index,
     'page' : page,
@@ -358,6 +532,7 @@ const routes = {
     'remove' : destroy,
     'assets' : assets,
     'images' : images,
+    'api' : api
 };
 
 module.exports = routes;
