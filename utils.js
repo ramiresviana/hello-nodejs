@@ -62,7 +62,9 @@ function getArticles() {
 // inserts article into data file
 function addArticle(data) {
     const articles = getArticles();
-    const id = Object.keys(articles).length + 1;
+
+    const articleList = Object.keys(articles);
+    const id = parseInt(articleList[articleList.length - 1]) + 1;
 
     const { title, content, image } = data;
     const article = { id, image, title, content };
